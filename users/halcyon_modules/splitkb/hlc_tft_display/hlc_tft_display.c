@@ -366,9 +366,6 @@ void housekeeping_task_display_menu_kb(void) {
         thintel15 = qp_load_font_mem(font_thintel15);
     }
 
-    // Clear surface first to avoid overlapping previous renders
-    qp_rect(lcd_surface, 0, 0, LCD_WIDTH - 1, LCD_HEIGHT - 1, HSV_BLACK, true);
-
     // Render across the full surface. Use non-verbose mode (short text) to reduce font size and
     // use splitkb/secondary colors.
     // Use a smaller font for menu rendering so text fits better on narrow screens
