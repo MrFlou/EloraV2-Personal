@@ -7,6 +7,13 @@
 #include "split_util.h"
 #include "_wait.h"
 
+// Forward declarations for optional module key processing hooks.
+// These are declared weak so this userspace can call them when the modules
+// are present (and safely skip when they are not).
+__attribute__((weak)) bool process_record_display_menu(uint16_t keycode, keyrecord_t *record);
+
+
+
 __attribute__((weak)) void module_suspend_power_down_kb(void);
 __attribute__((weak)) void module_suspend_wakeup_init_kb(void);
 
@@ -90,6 +97,30 @@ void keyboard_post_init_kb(void) {
     // User post init
     keyboard_post_init_user();
 }
+
+/**
+ * process_record_user shim for the halcyon userspace.
+ * Forward key processing to module-provided handlers when available.
+ * This ensures modules like drashna/display_menu receive key events (e.g. DISPLAY_MENU)
+ * without requiring keymaps to implement custom shims.
+ */
+__attribute__((weak)) bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    bool keep_processing = true;
+
+    // If the display_menu module is present, let it handle the keycode first.
+    // It will return false when it has consumed the event.
+    if ((void *)process_record_display_menu != NULL) {
+        if (!process_record_display_menu(keycode, record)) {
+            return false;
+        }
+    }
+
+    // Fall through to the default user processing. Return true to allow normal
+    // QMK processing to continue (keymaps can still provide their own
+    // process_record_user which will override this weak symbol).
+    return true;
+}
+
 
 void housekeeping_task_kb(void) {
     if (is_keyboard_master()) {
