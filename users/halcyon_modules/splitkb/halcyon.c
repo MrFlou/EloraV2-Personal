@@ -105,6 +105,17 @@ void keyboard_post_init_kb(void) {
  * without requiring keymaps to implement custom shims.
  */
 __attribute__((weak)) bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    // Allow Vial (host) -> QMK runtime remaps: Vial computes custom keycodes in a different
+    // numeric range than QMK's internal keycodes. Translate known Vial custom values to the
+    // expected firmware keycodes before forwarding to module handlers.
+    // Vial's DISPLAY_MENU computed value observed as 0x7E00; translate it to the firmware
+    // DISPLAY_MENU constant if present.
+#ifdef DISPLAY_MENU
+    if (keycode == 0x7E00) {
+        keycode = DISPLAY_MENU;
+    }
+#endif
+
     // If the display_menu module is present, let it handle the keycode first.
     // It will return false when it has consumed the event.
     if ((void *)process_record_display_menu != NULL) {
