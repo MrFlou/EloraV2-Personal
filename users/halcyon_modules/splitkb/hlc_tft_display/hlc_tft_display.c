@@ -319,7 +319,8 @@ bool display_module_housekeeping_task_kb(bool second_display) {
     }
 
     // Update display information (layers, numlock, etc.)
-    if(!second_display) {
+    // Skip the normal UI update when the menu is active to avoid overwriting the menu
+    if(!second_display && !menu_state.is_in_menu) {
         update_display();
     }
 
@@ -360,5 +361,10 @@ void housekeeping_task_display_menu_kb(void) {
 
     // Render across the full surface. Use non-verbose mode (short text) to reduce font size and
     // use splitkb/secondary colors.
-    painter_render_menu(lcd_surface, Retron27, 0, 0, LCD_WIDTH, LCD_HEIGHT, false, (hsv_t){HSV_SPLITKB}, (hsv_t){HSV_LAYER_3});
+    if (painter_render_menu(lcd_surface, Retron27, 0, 0, LCD_WIDTH, LCD_HEIGHT, false, (hsv_t){HSV_SPLITKB}, (hsv_t){HSV_LAYER_3})) {
+        // Ensure the rendered menu is immediately blitted to the LCD to avoid it being
+        // overwritten or left invisible due to caller ordering or throttling.
+        qp_surface_draw(lcd_surface, lcd, 0, 0, 0);
+        qp_flush(lcd);
+    }
 }
