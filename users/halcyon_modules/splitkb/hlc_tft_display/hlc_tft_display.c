@@ -335,16 +335,30 @@ bool display_module_housekeeping_task_kb(bool second_display) {
  * Called weakly from modules/drashna/display_menu.c via housekeeping_task_display_menu_kb().
  */
 void housekeeping_task_display_menu_kb(void) {
-    // Only attempt to render if the menu is open (the painter_render_menu will early-return otherwise)
+    static bool last_in_menu = false;
+
+    // If the menu has just closed, clear the surface so remnants of the menu are removed.
     if (!menu_state.is_in_menu) {
+        if (last_in_menu) {
+            qp_rect(lcd_surface, 0, 0, LCD_WIDTH - 1, LCD_HEIGHT - 1, HSV_BLACK, true);
+            qp_surface_draw(lcd_surface, lcd, 0, 0, 0);
+            qp_flush(lcd);
+            last_in_menu = false;
+        }
         return;
     }
+
+    last_in_menu = true;
 
     // Ensure font is loaded
     if (!Retron27) {
         Retron27 = qp_load_font_mem(font_Retron2000_27);
     }
 
-    // Render across the full surface. Use verbose mode (full text) and splitkb/secondary colors.
-    painter_render_menu(lcd_surface, Retron27, 0, 0, LCD_WIDTH, LCD_HEIGHT, true, (hsv_t){HSV_SPLITKB}, (hsv_t){HSV_LAYER_3});
+    // Clear surface first to avoid overlapping previous renders
+    qp_rect(lcd_surface, 0, 0, LCD_WIDTH - 1, LCD_HEIGHT - 1, HSV_BLACK, true);
+
+    // Render across the full surface. Use non-verbose mode (short text) to reduce font size and
+    // use splitkb/secondary colors.
+    painter_render_menu(lcd_surface, Retron27, 0, 0, LCD_WIDTH, LCD_HEIGHT, false, (hsv_t){HSV_SPLITKB}, (hsv_t){HSV_LAYER_3});
 }

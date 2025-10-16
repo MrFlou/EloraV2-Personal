@@ -1,5 +1,11 @@
 {
     "lighting": "vialrgb",
+    "customKeycodes": [
+        {"name": "DISPLAY_MENU",
+         "title": "DISPLAY_MENU",
+         "shortName": "DS_MENU"
+        }
+    ],
     "matrix": {
         "rows": 10,
         "cols": 6
