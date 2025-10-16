@@ -4,6 +4,13 @@
 #include "halcyon.h"
 #include "hlc_tft_display.h"
 
+// Render helper for drashna display_menu (quantum painter)
+#include "modules/drashna/display_menu/qp_render_menu.h"
+#include "modules/drashna/display_menu/display_menu.h"
+
+/* display_menu exposes the runtime menu state from display_menu.c; declare it extern here */
+extern menu_state_t menu_state;
+
 #include "hardware/structs/rosc.h"
 
 // Fonts mono2
@@ -284,7 +291,7 @@ bool module_post_init_kb(void) {
 // Called from halcyon.c
 bool display_module_housekeeping_task_kb(bool second_display) {
     if(!display_module_housekeeping_task_user(second_display)) { return false; }
-
+    housekeeping_task_display_menu();
     if(second_display) {
         static uint32_t last_draw = 0;
         static bool second_display_set = false;
@@ -321,4 +328,23 @@ bool display_module_housekeeping_task_kb(bool second_display) {
     qp_flush(lcd);
 
     return true;
+}
+
+/*
+ * Render the drashna display_menu using Quantum Painter.
+ * Called weakly from modules/drashna/display_menu.c via housekeeping_task_display_menu_kb().
+ */
+void housekeeping_task_display_menu_kb(void) {
+    // Only attempt to render if the menu is open (the painter_render_menu will early-return otherwise)
+    if (!menu_state.is_in_menu) {
+        return;
+    }
+
+    // Ensure font is loaded
+    if (!Retron27) {
+        Retron27 = qp_load_font_mem(font_Retron2000_27);
+    }
+
+    // Render across the full surface. Use verbose mode (full text) and splitkb/secondary colors.
+    painter_render_menu(lcd_surface, Retron27, 0, 0, LCD_WIDTH, LCD_HEIGHT, true, (hsv_t){HSV_SPLITKB}, (hsv_t){HSV_LAYER_3});
 }
