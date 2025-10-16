@@ -105,8 +105,6 @@ void keyboard_post_init_kb(void) {
  * without requiring keymaps to implement custom shims.
  */
 __attribute__((weak)) bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    bool keep_processing = true;
-
     // If the display_menu module is present, let it handle the keycode first.
     // It will return false when it has consumed the event.
     if ((void *)process_record_display_menu != NULL) {
