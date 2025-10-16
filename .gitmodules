@@ -1,0 +1,3 @@
+[submodule "modules/drashna"]
+	path = modules/drashna
+	url = https://github.com/MrFlou/qmk_modules-Personal.git
