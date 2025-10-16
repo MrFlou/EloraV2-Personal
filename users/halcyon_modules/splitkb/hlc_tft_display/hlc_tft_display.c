@@ -16,6 +16,8 @@ extern menu_state_t menu_state;
 // Fonts mono2
 #include "graphics/fonts/Retron2000-27.qff.h"
 #include "graphics/fonts/Retron2000-underline-27.qff.h"
+// Smaller font (mono2)
+#include "../../../../examples/display/graphics/thintel15.qff.h"
 
 // Numbers mono2
 #include "graphics/numbers/0.qgf.h"
@@ -36,6 +38,7 @@ static const char *scroll =      "Scroll";
 
 static painter_font_handle_t Retron27;
 static painter_font_handle_t Retron27_underline;
+static painter_font_handle_t thintel15;
 static painter_image_handle_t layer_number;
 
 static uint8_t lcd_surface_fb[SURFACE_REQUIRED_BUFFER_BYTE_SIZE(135, 240, 16)];
@@ -355,13 +358,17 @@ void housekeeping_task_display_menu_kb(void) {
     if (!Retron27) {
         Retron27 = qp_load_font_mem(font_Retron2000_27);
     }
+    if (!thintel15) {
+        thintel15 = qp_load_font_mem(font_thintel15);
+    }
 
     // Clear surface first to avoid overlapping previous renders
     qp_rect(lcd_surface, 0, 0, LCD_WIDTH - 1, LCD_HEIGHT - 1, HSV_BLACK, true);
 
     // Render across the full surface. Use non-verbose mode (short text) to reduce font size and
     // use splitkb/secondary colors.
-    if (painter_render_menu(lcd_surface, Retron27, 0, 0, LCD_WIDTH, LCD_HEIGHT, false, (hsv_t){HSV_SPLITKB}, (hsv_t){HSV_LAYER_3})) {
+    // Use a smaller font for menu rendering so text fits better on narrow screens
+    if (painter_render_menu(lcd_surface, thintel15, 0, 0, LCD_WIDTH, LCD_HEIGHT, false, (hsv_t){HSV_SPLITKB}, (hsv_t){HSV_LAYER_3})) {
         // Ensure the rendered menu is immediately blitted to the LCD to avoid it being
         // overwritten or left invisible due to caller ordering or throttling.
         qp_surface_draw(lcd_surface, lcd, 0, 0, 0);

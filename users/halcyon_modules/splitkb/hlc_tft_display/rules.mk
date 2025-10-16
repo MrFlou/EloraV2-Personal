@@ -5,6 +5,9 @@ POST_CONFIG_H += $(USER_PATH)/splitkb/hlc_tft_display/config.h
 SRC += $(USER_PATH)/splitkb/hlc_tft_display/graphics/fonts/Retron2000-27.qff.c \
        $(USER_PATH)/splitkb/hlc_tft_display/graphics/fonts/Retron2000-underline-27.qff.c
 
+# Smaller font (used for menu rendering)
+SRC += ../../../../examples/display/graphics/thintel15.qff.c
+
 # Numbers in image format
 SRC += $(USER_PATH)/splitkb/hlc_tft_display/graphics/numbers/0.qgf.c \
 	   $(USER_PATH)/splitkb/hlc_tft_display/graphics/numbers/1.qgf.c \
