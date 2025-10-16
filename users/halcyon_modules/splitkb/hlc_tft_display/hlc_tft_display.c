@@ -327,9 +327,13 @@ bool display_module_housekeeping_task_kb(bool second_display) {
         update_display();
     }
 
-    // Move surface to lcd
-    qp_surface_draw(lcd_surface, lcd, 0, 0, 0);
-    qp_flush(lcd);
+    // Move surface to lcd. If the menu is active the menu renderer already
+    // blits and flushes the surface; avoid doing it here to prevent competing
+    // flushes which can produce visible flashing.
+    if (!menu_state.is_in_menu) {
+        qp_surface_draw(lcd_surface, lcd, 0, 0, 0);
+        qp_flush(lcd);
+    }
 
     return true;
 }
